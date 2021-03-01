@@ -11,13 +11,13 @@ end
 function activate()
     local playlistItems = vlc.playlist.get("normal", false).children
     local currentItem = playlistItems[#playlistItems]
-    local fileExtension = GetFileExtension(currentItem.name)
+    local fileExtension = GetFileExtension(currentItem.path)
     local folderPath = string.gsub(string.match(currentItem.path, ".*[\\\\/]"), "file:///", "")
     local folderPath = string.gsub(folderPath, "%%20", " ")
     local folderPath = string.gsub(folderPath, "%%5B", "[")
     local folderPath = string.gsub(folderPath, "%%5D", "]")
 
-    --vlc.msg.info(currentItem.path) 
+    --vlc.msg.info(currentItem.path)
     --vlc.msg.info(folderPath)
 
     local files = vlc.io.readdir(folderPath)
@@ -26,7 +26,11 @@ function activate()
 
     for _, item in ipairs(files) do
         if (EndsWith(item, fileExtension)) then
-            if (currentItem.name < item) then
+            local currentItemName = currentItem.name;
+            if (EndsWith(currentItemName, fileExtension) ~= true) then
+                currentItemName = currentItemName .. fileExtension
+            end
+            if (currentItemName < item) then
                 vlc.playlist.enqueue({{path = "file:///" .. folderPath .. item; name = item}})
             end
         end
